@@ -68,8 +68,8 @@ class Font {
     const shapes: Shape[] = [];
     const paths = createPaths(text, size, this.data);
 
-    for (let p = 0, pl = paths.length; p < pl; p++) {
-      Array.prototype.push.apply(shapes, paths[p].toShapes(false));
+    for (let p = 0; p < paths.length; p++) {
+      shapes.push(...paths[p].toShapes(false));
     }
 
     return shapes;
@@ -79,7 +79,7 @@ class Font {
 function createPaths(text: string, size: number, data: any) {
   const chars = Array.from(text);
   const scale = size / data.resolution;
-  const line_height =
+  const lineHeight =
     (data.boundingBox.yMax - data.boundingBox.yMin + data.underlineThickness) *
     scale;
 
@@ -93,7 +93,7 @@ function createPaths(text: string, size: number, data: any) {
 
     if (char === "\n") {
       offsetX = 0;
-      offsetY -= line_height;
+      offsetY -= lineHeight;
     } else {
       const ret = createPath(char, scale, offsetX, offsetY, data);
       offsetX += ret.offsetX;
@@ -111,7 +111,7 @@ function createPath(
   offsetY: number,
   data: any
 ) {
-  const glyph = data.glyphs[char] || data.glyphs["?"];
+  const glyph = data.glyphs[char];
 
   if (!glyph) {
     throw new Error(
@@ -131,7 +131,7 @@ function createPath(
     const outline =
       glyph._cachedOutline || (glyph._cachedOutline = glyph.o.split(" "));
 
-    for (let i = 0, l = outline.length; i < l; ) {
+    for (let i = 0; i < outline.length; ) {
       const action = outline[i++];
 
       switch (action) {
