@@ -1,27 +1,29 @@
 import { css, Global } from "@emotion/react";
-import { useEffect } from "react";
-import Scene from "./Scene";
+import { useLayoutEffect } from "react";
 
-import useStateRef from "./hooks/useStateRef";
+import Scene from "./Scene";
+import useId from './hooks/useId'
 
 const App = () => {
-  const [canvas, canvasRef] = useStateRef<HTMLCanvasElement>();
-  const [scene, setScene] = useStateRef<Scene>();
+  const canvasId = useId();
 
-  useEffect(() => {
-    if (scene || !canvas) {
-      return;
+  useLayoutEffect(() => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+      throw new Error("Missing canvas");
     }
+    
+    const scene = new Scene(canvas);
 
-    const scene_ = new Scene(canvas);
-    setScene(scene_);
-  }, [canvas]);
+    return () => {
+      scene.destroy()
+    }
+  }, []);
 
   return (
     <>
       <Global styles={globalStyle} />
-      {/* TODO type */}
-      <canvas css={canvasStyle} ref={canvasRef as any} />
+      <canvas id={canvasId} css={canvasStyle} />
     </>
   );
 };

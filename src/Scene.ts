@@ -17,6 +17,8 @@ export default class Scene {
   private textMesh: THREE.Mesh;
   private textGeometry: TextGeometry;
 
+  private destroyed = false;
+
   constructor(canvas: HTMLCanvasElement) {
     THREE.Cache.enabled = true;
 
@@ -106,6 +108,11 @@ export default class Scene {
     this.render();
   }
 
+  destroy() {
+    this.destroyed = true;
+    window.removeEventListener("resize", this.onWindowResize);
+  }
+
   onWindowResize = () => {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
@@ -121,6 +128,10 @@ export default class Scene {
   render = () => {
     this.camera.lookAt(this.cameraTarget);
     this.renderer.render(this.scene, this.camera);
+
+    if (this.destroyed) {
+      return;
+    }
 
     requestAnimationFrame(this.render);
   };
