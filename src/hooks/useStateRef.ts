@@ -1,8 +1,6 @@
-import { useState } from "react";
+import { RefCallback, useState } from "react";
 
-const useStateRef = <T>(
-  default_?: T
-): [T | undefined, (value: T | undefined) => void] => {
+const useStateRef = <T>(default_?: T): [T | undefined, (value: T) => void] => {
   return useState<T | undefined>(default_);
 };
 
