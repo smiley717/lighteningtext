@@ -35,7 +35,7 @@ const LIGHTNING_SVG_PATH = `
 export default class Scene {
   static FIELD_OF_VIEW = 30;
   static Z_NEAR = 1;
-  static Z_FAR = 1000;
+  static Z_FAR = 10000;
 
   private canvas: HTMLCanvasElement;
   private scene: THREE.Scene;
@@ -61,9 +61,17 @@ export default class Scene {
     directionalLight.position.set(0, 0, 1).normalize();
     this.scene.add(directionalLight);
 
-    const pointLight = new THREE.PointLight(SHAPES_COLOR, 1.5);
-    pointLight.position.set(0, 100, 90);
-    this.scene.add(pointLight);
+    const pointLight1 = new THREE.PointLight(SHAPES_COLOR, 1);
+    pointLight1.position.set(120, 120, 90);
+    this.scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(SHAPES_COLOR, 1);
+    pointLight2.position.set(-120, 120, 90);
+    this.scene.add(pointLight2);
+
+    const pointLight3 = new THREE.PointLight(SHAPES_COLOR, 1.5);
+    pointLight3.position.set(0, 120, -90);
+    this.scene.add(pointLight3);
 
     this.camera = new THREE.PerspectiveCamera(
       Scene.FIELD_OF_VIEW,
@@ -109,18 +117,6 @@ export default class Scene {
     this.textMesh.position.y = 30 + 100;
     this.textMesh.position.z = 0;
     this.scene.add(this.textMesh);
-
-    const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(10000, 10000),
-      new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        opacity: 0.5,
-        transparent: true,
-      })
-    );
-    plane.position.y = 100;
-    plane.rotation.x = -Math.PI / 2;
-    this.scene.add(plane);
 
     // Lightning Bolt
     this.lightningBolt = new THREE.Group();
