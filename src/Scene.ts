@@ -37,6 +37,8 @@ export default class Scene {
   static Z_NEAR = 1;
   static Z_FAR = 10000;
 
+  static CAMERA_CHANGE_INTERVAL_MS = 5000;
+
   private canvas: HTMLCanvasElement;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -45,6 +47,10 @@ export default class Scene {
   private textMesh: THREE.Mesh;
   private textGeometry: TextGeometry;
   private lightningBolt: THREE.Group;
+
+  private lastRender: DOMHighResTimeStamp = 0;
+  private lastCameraChange: DOMHighResTimeStamp = 0;
+  private cameraVelocity = new THREE.Vector3();
 
   private destroyed = false;
 
@@ -79,7 +85,6 @@ export default class Scene {
       Scene.Z_NEAR,
       Scene.Z_FAR
     );
-    this.camera.position.set(0, 400, 700);
     this.cameraTarget = new THREE.Vector3(0, 150, 0);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -154,7 +159,20 @@ export default class Scene {
 
     const controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-    this.render();
+    this.randomizeCamera();
+    this.render(0);
+  }
+
+  randomizeCamera() {
+    this.camera.position.x = THREE.MathUtils.randInt(-200, 200);
+    this.camera.position.y = THREE.MathUtils.randInt(300, 500);
+    this.camera.position.z = THREE.MathUtils.randInt(-1000, 1000);
+
+    this.cameraVelocity.x = THREE.MathUtils.randFloat(0, 1);
+    this.cameraVelocity.y = THREE.MathUtils.randFloat(0, 1);
+    this.cameraVelocity.z = THREE.MathUtils.randFloat(0, 1);
+
+    this.lastCameraChange = window.performance.now();
   }
 
   destroy() {
@@ -174,9 +192,20 @@ export default class Scene {
     this.renderer.setSize(window.innerWidth, window.innerHeight, false);
   };
 
-  render = () => {
+  render = (time: DOMHighResTimeStamp) => {
+    const delta = time - this.lastRender;
+    this.lastRender = time;
+
+    this.camera.position.x += this.cameraVelocity.x * 0.1 * delta;
+    this.camera.position.y += this.cameraVelocity.y * 0.1 * delta;
+    this.camera.position.z += this.cameraVelocity.z * 0.1 * delta;
+
     this.camera.lookAt(this.cameraTarget);
     this.renderer.render(this.scene, this.camera);
+
+    if (time - this.lastCameraChange > Scene.CAMERA_CHANGE_INTERVAL_MS) {
+      this.randomizeCamera();
+    }
 
     if (this.destroyed) {
       return;
