@@ -1,6 +1,8 @@
 import * as THREE from "three";
+
 import { FontLoader } from "./FontLoader";
 import { TextGeometry } from "./TextGeometry";
+import { OrbitControls } from "./OrbitControls";
 import svgPathToShapePath from "./svgPathToShapePath";
 
 import fontData from "./fonts/droid_sans_regular.typeface.json";
@@ -153,6 +155,8 @@ export default class Scene {
     this.lightningBolt.rotateZ(Math.PI);
 
     window.addEventListener("resize", this.onWindowResize);
+
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.render();
   }
