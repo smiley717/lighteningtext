@@ -9,13 +9,25 @@ const BACKGROUND_COLOR = "lightblue";
 const SHAPES_COLOR = "#f9fc21";
 
 const LIGHTNING_SVG_PATH = `
-  M325.662,3.768C324.325,1.437,321.844,0,319.157,0H164.555c-3.218,0-6.078,2.053-7.107,5.102L91.19,201.421
-  c-0.772,2.289-0.394,4.81,1.014,6.772c1.409,1.962,3.677,3.126,6.093,3.126h62.812L88.817,404.876
-  c-1.278,3.422,0.096,7.268,3.254,9.106c1.18,0.686,2.48,1.018,3.769,1.018c2.16,0,4.287-0.932,5.756-2.687l201.228-240.49
-  c1.869-2.234,2.276-5.348,1.043-7.987c-1.232-2.639-3.882-4.326-6.795-4.326h-58.094l86.654-148.224
-  C326.988,8.966,327,6.099,325.662,3.768z M219.429,163.223c-1.356,2.32-1.368,5.187-0.03,7.518
-  c1.337,2.331,3.818,3.768,6.505,3.768h55.111L118.189,369.107l60.754-162.664c0.86-2.302,0.537-4.88-0.865-6.9
-  c-1.401-2.019-3.703-3.224-6.161-3.224h-63.173L169.939,15h136.145L219.429,163.223z
+  m325.662,3.768
+  c-1.337,-2.331 -3.818,-3.768 -6.505,-3.768
+  l-154.602,0
+  c-3.218,0 -6.078,2.053 -7.107,5.102
+  l-66.258,196.319
+  c-0.772,2.289 -0.394,4.81 1.014,6.772
+  c1.409,1.962 3.677,3.126 6.093,3.126
+  l62.812,0
+  l-72.292,193.557
+  c-1.278,3.422 0.096,7.268 3.254,9.106
+  c1.18,0.686 2.48,1.018 3.769,1.018
+  c2.16,0 4.287,-0.932 5.756,-2.687
+  l201.228,-240.49
+  c1.869,-2.234 2.276,-5.348 1.043,-7.987
+  c-1.232,-2.639 -3.882,-4.326 -6.795,-4.326
+  l-58.094,0
+  l86.654,-148.224
+  c1.356,-2.32 1.368,-5.187 0.03,-7.518
+  z
 `;
 
 export default class Scene {
@@ -30,6 +42,7 @@ export default class Scene {
   private renderer: THREE.WebGLRenderer;
   private textMesh: THREE.Mesh;
   private textGeometry: TextGeometry;
+  private lightningBolt: THREE.Group;
 
   private destroyed = false;
 
@@ -79,29 +92,20 @@ export default class Scene {
       bevelSize: 1.5,
     });
 
-    this.textGeometry.computeBoundingBox();
-
-    if (!this.textGeometry.boundingBox) {
-      throw new Error("missing textGeometry.boundingBox");
-    }
-
-    const centerOffset =
-      -0.5 *
-      (this.textGeometry.boundingBox.max.x -
-        this.textGeometry.boundingBox.min.x);
-
     const materials = [
       new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
       new THREE.MeshPhongMaterial({ color: 0xffffff }), // side
     ];
     this.textMesh = new THREE.Mesh(this.textGeometry, materials);
 
+    const textBoundingBox = new THREE.Box3().setFromObject(this.textMesh);
+    const textSize = textBoundingBox.getSize(new THREE.Vector3());
+
+    const centerOffset = -0.5 * textSize.x;
+
     this.textMesh.position.x = centerOffset;
     this.textMesh.position.y = 30 + 100;
     this.textMesh.position.z = 0;
-
-    this.textMesh.rotation.x = 0;
-    this.textMesh.rotation.y = Math.PI * 2;
     this.scene.add(this.textMesh);
 
     const plane = new THREE.Mesh(
@@ -117,18 +121,11 @@ export default class Scene {
     this.scene.add(plane);
 
     // Lightning Bolt
-    const group = new THREE.Group();
-    group.translateX(-100);
-    group.translateY(200);
-    group.rotateZ(Math.PI);
-    group.scale.set(0.25, 0.25, 0.25);
-    this.scene.add(group);
+    this.lightningBolt = new THREE.Group();
+    this.lightningBolt.scale.set(0.25, 0.25, 1);
+    this.scene.add(this.lightningBolt);
 
     const path = svgPathToShapePath(LIGHTNING_SVG_PATH);
-    const material = new THREE.MeshPhongMaterial({
-      color: "white",
-      flatShading: true,
-    });
     const shapes = path.toShapes(true);
     shapes.forEach((shape) => {
       const geometry = new THREE.ExtrudeGeometry(shape, {
@@ -136,9 +133,24 @@ export default class Scene {
         bevelEnabled: true,
       });
 
-      const mesh = new THREE.Mesh(geometry, material);
-      group.add(mesh);
+      const mesh = new THREE.Mesh(geometry, materials);
+      this.lightningBolt.add(mesh);
     });
+
+    const lightningBoundingBox = new THREE.Box3().setFromObject(
+      this.lightningBolt
+    );
+    const lightningSize = lightningBoundingBox.getSize(new THREE.Vector3());
+
+    this.lightningBolt.translateY(
+      this.textMesh.getWorldPosition(new THREE.Vector3()).y +
+        textSize.y / 2 -
+        lightningSize.y / 2 +
+        // Add the height because the lightning bolt will be rotated
+        lightningSize.y
+    );
+    this.lightningBolt.translateX(-textSize.x / 2);
+    this.lightningBolt.rotateZ(Math.PI);
 
     window.addEventListener("resize", this.onWindowResize);
 
