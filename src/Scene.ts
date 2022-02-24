@@ -185,8 +185,6 @@ export default class Scene {
   onWindowResize = () => {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
-    // this.canvas.style.width = `${window.innerWidth}px`;
-    // this.canvas.style.height = `${window.innerHeight}px`;
 
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
