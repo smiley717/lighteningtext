@@ -2,6 +2,7 @@ import { css, Global } from "@emotion/react";
 import { useLayoutEffect } from "react";
 
 import Scene from "./Scene";
+import Faq from "./Faq";
 import useId from "./hooks/useId";
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
     <>
       <Global styles={globalStyle} />
       <canvas id={canvasId} css={canvasStyle} />
+      <Faq />
     </>
   );
 };
@@ -33,6 +35,8 @@ const globalStyle = css`
   body {
     margin: 0;
     height: 100%;
+    position: relative;
+    font-family: sans-serif;
   }
 
   #root {
