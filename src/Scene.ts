@@ -48,6 +48,7 @@ export default class Scene {
   private textGeometry: TextGeometry;
   private lightningBolt: THREE.Group;
 
+  private controls: OrbitControls;
   private lastRender: DOMHighResTimeStamp = 0;
   private lastCameraChange: DOMHighResTimeStamp = 0;
   private cameraVelocity = new THREE.Vector3();
@@ -157,7 +158,7 @@ export default class Scene {
 
     window.addEventListener("resize", this.onWindowResize);
 
-    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.randomizeCamera();
     this.render(0);
@@ -177,6 +178,7 @@ export default class Scene {
 
   destroy() {
     this.destroyed = true;
+    this.controls.dispose();
     window.removeEventListener("resize", this.onWindowResize);
   }
 
