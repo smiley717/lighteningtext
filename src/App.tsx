@@ -2,7 +2,7 @@ import { css, Global } from "@emotion/react";
 import { useLayoutEffect } from "react";
 
 import Scene from "./Scene";
-import useId from './hooks/useId'
+import useId from "./hooks/useId";
 
 const App = () => {
   const canvasId = useId();
@@ -12,12 +12,12 @@ const App = () => {
     if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
       throw new Error("Missing canvas");
     }
-    
+
     const scene = new Scene(canvas);
 
     return () => {
-      scene.destroy()
-    }
+      scene.destroy();
+    };
   }, []);
 
   return (
